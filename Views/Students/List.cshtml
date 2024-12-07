@@ -1,0 +1,75 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model List<StudentPortal.Models.Entities.Student>
+
+<h1>Students</h1>
+<a class="btn btn-info" asp-controller="Students" asp-action="Add">Add</a>
+
+<table class="table" id="studentTable">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Name</th>
+			<th>Email</th>
+			<th>Phone</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var student in Model)
+		{
+			<tr>
+				<td>@student.Id</td>
+				<td>@student.Name</td>
+				<td>@student.Email</td>
+				<td>@student.Phone</td>
+				<td><a class="btn btn-primary" asp-controller="Students" asp-action="Edit" asp-route-id="@student.Id">Edit</a></td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<div>
+	<input type="text" id="name" />
+	<input type="text" id="phone" />
+	<button onclick="btnHandler(this)">Add</button>
+</div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+	<script>
+		function btnHandler(e){
+			var nameTag=$('#name')[0];
+			var phoneTag=$('#phone')[0];
+			var student = {"Name":nameTag.value,"Phone":phoneTag.value}
+			$.ajax({
+				url: '/Students/AjaxCall',
+				type: 'POST',
+				data: JSON.stringify(student),
+				contentType: 'application/json; charset=utf-8',
+				dataType: 'json', // Corrected to camelCase
+				success: function(response) {
+					
+					var newRow=`<tr>
+				<td>${response.id}</td>
+				<td>${response.name}</td>
+				<td>${response.email}</td>
+				<td>${response.phone}</td>
+				<td><a class="btn btn-primary" asp-controller="Students" asp-action="Edit" asp-route-id="${response.id}">Edit</a></td>
+			</tr>`
+				$('#studentTable tbody').append(newRow);
+					console.log('Student added successfully!', response, typeof(response));
+				},
+				error: function(xhr, status, error) {
+					console.error('Error adding student:', error);
+				}
+			});
+		}
+	</script>
+}
